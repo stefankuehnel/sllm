@@ -1,0 +1,66 @@
+services:
+  ##############################################################################
+  # DEVELOPMENT CONTAINER SERVICE                                              #
+  ##############################################################################
+  devcontainer:
+    # --------------------------------------------------------------------------
+    # IMAGE
+    # --------------------------------------------------------------------------
+    # Specifies the container image and exact digest used for the
+    # development environment.
+    image: "mcr.microsoft.com/devcontainers/base@sha256:55126de3b3e113096201055951b4cb717900bafb379c59dcbada65c49cd7ce22" # jammy
+
+    # --------------------------------------------------------------------------
+    # TTY
+    # --------------------------------------------------------------------------
+    # When set to true, this directive allocates a pseudo-TTY. This is
+    # required for processes that remain active and allow for interactive
+    # shell sessions.
+    tty: true
+
+    # --------------------------------------------------------------------------
+    # VOLUMES
+    # --------------------------------------------------------------------------
+    # Defines the mount points between the host system and the container.
+    volumes:
+      - ..:/workspace
+
+  ##############################################################################
+  # LLAMA SERVER SERVICE                                                       #
+  ##############################################################################
+  llama-server:
+    # --------------------------------------------------------------------------
+    # IMAGE
+    # --------------------------------------------------------------------------
+    # Specifies the container image and exact digest used for the
+    # LLaMA server.
+    image: "ghcr.io/ggml-org/llama.cpp@sha256:847c4fcf33eea9be54494598aad579f717ccf0cc058bba4c3ff587d38603edde"
+
+    # --------------------------------------------------------------------------
+    # ENVIRONMENT VARIABLES
+    # --------------------------------------------------------------------------
+    # Defines environment variables that are passed to the container 
+    # at runtime. These variables can be used to configure the behavior 
+    # of the LLaMA server, such as specifying the model repository, 
+    # file, and port.
+    environment:
+      LLAMA_ARG_HF_REPO: "microsoft/Phi-3-mini-4k-instruct-gguf"
+      LLAMA_ARG_HF_FILE: "Phi-3-mini-4k-instruct-q4.gguf"
+      LLAMA_ARG_PORT: 8080
+
+      HF_HOME: "/models"
+      LLAMA_CACHE: "/models"
+
+    # --------------------------------------------------------------------------
+    # PORTS
+    # --------------------------------------------------------------------------
+    # Maps the container's internal port to a port on the host system.
+    ports:
+      - "8080:8080"
+    
+    # --------------------------------------------------------------------------
+    # VOLUMES
+    # --------------------------------------------------------------------------
+    # Defines the mount points between the host system and the container.
+    volumes:
+      - ../.llama/models:/models

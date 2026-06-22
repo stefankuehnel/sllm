@@ -1,0 +1,42 @@
+version: "3"
+
+tasks:
+  default:
+    desc: "Run default task"
+    cmds:
+      - task: "run"
+
+  run:
+    desc: "Run project"
+    cmds:
+      - task: "run:model"
+
+  run:model:
+    desc: "Run project with model"
+    cmds:
+      - |
+        curl http://llama-server:8080/v1/chat/completions \
+          -H "Content-Type: application/json" \
+          -d '{ "messages": [{"role": "user", "content": "{{ .LLAMA_CPP__PROMPT | default "Say hello" }}"}] }'
+
+  format:
+    desc: "Format project"
+    cmds:
+      - task: "format:nix"
+
+  format:nix:
+    desc: "Format project with Nix"
+    sources:
+      - "**/*.nix"
+    cmds:
+      - "nix fmt"
+
+  clean:
+    desc: "Clean project"
+    cmds:
+      - task: "clean:task"
+
+  clean:task:
+    desc: "Clean project '.task/' directory"
+    cmds:
+      - "rm --recursive --force .task/"

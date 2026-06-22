@@ -1,0 +1,40 @@
+name: "CI"
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: "read"
+
+jobs:
+  nix:
+    runs-on: "ubuntu-latest"
+    container:
+      image: "docker.io/nixos/nix@sha256:b9c9611c8530fa8049a1215b20638536e1e71dcaf85212e47845112caf3adeea" # v2.34.0
+      env:
+        NIX_CONFIG: "experimental-features = nix-command flakes"
+
+    services:
+      llama-server:
+        image: "ghcr.io/ggml-org/llama.cpp@sha256:847c4fcf33eea9be54494598aad579f717ccf0cc058bba4c3ff587d38603edde"
+        env:
+          LLAMA_ARG_HF_REPO: "microsoft/Phi-3-mini-4k-instruct-gguf"
+          LLAMA_ARG_HF_FILE: "Phi-3-mini-4k-instruct-q4.gguf"
+          LLAMA_ARG_PORT: 8080
+        ports:
+          - "8080:8080"
+
+    steps:
+      - name: "GitHub: Checkout Repository"
+        run: |
+          git init --quiet --initial-branch "main"
+          git config --global --add safe.directory "*"
+          git remote add origin "${{ github.server_url }}/${{ github.repository }}"
+          git config --local http.${{ github.server_url }}/.extraheader "Authorization: basic $(echo -n "x-access-token:${{ github.token }}" | base64 --wrap=0)"
+          git fetch --quiet --no-tags --depth=1 origin "${{ github.ref }}"
+          git checkout --quiet "${{ github.sha }}"
+      - name: "Task: Run"
+        shell: "nix develop .#ciEnvironment -c bash -e {0}"
+        run: "task run"
