@@ -37,6 +37,7 @@
       dependencies = pkgs: [
         pkgs.git
         pkgs.go-task
+        pkgs.jq
       ];
 
       devDependencies = pkgs: [

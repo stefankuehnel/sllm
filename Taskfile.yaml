@@ -17,7 +17,14 @@ tasks:
       - |
         curl http://llama-server:8080/v1/chat/completions \
           -H "Content-Type: application/json" \
-          -d '{ "messages": [{"role": "user", "content": "{{ .LLAMA_CPP__PROMPT | default "Say hello" }}"}] }'
+          -d "${LLAMA_CPP__PAYLOAD}"
+
+    env:
+      LLAMA_CPP__PAYLOAD:
+        sh: |
+          jq \
+            -n \
+            --arg content "${LLAMA_CPP__PROMPT:-Say hello}" '{ messages: [{ role: "user", content: $content }]}'
 
   format:
     desc: "Format project"
